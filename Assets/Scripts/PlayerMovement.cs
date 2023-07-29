@@ -12,11 +12,13 @@ public class PlayerMovement : MonoBehaviour
 
     public LayerMask ground;
 
-    private Vector2 newPos;
-
     public float jumpSpeed;
     public float speed;
     public float airSpeed;
+
+    public float moveX;
+
+    public float groundDrag;
 
     [SerializeField]
     private bool grounded;
@@ -34,32 +36,113 @@ public class PlayerMovement : MonoBehaviour
     {
         playerControls.Disable();
     }
+    private void Start()
+    {
+        playerControls.Player.Jump.performed += Jump;
+    }
     private void FixedUpdate()
     {
         GroundCheck();
         ApplyDrag();
         Move();       
-    }
-    private void Start()
+    }   
+    public void Move()
     {
-        playerControls.Player.Jump.performed += Jump;
-    }
-    private void Move()
-    {
+        Vector2 move = playerControls.Player.Move.ReadValue<Vector2>();
+            
         if (grounded)
-        {
-            Vector2 move = playerControls.Player.Move.ReadValue<Vector2>();
+        {          
+            moveX = move.x;
             move.x *= speed;
             rb2d.AddForce(move * Vector2.right, ForceMode2D.Force);
+            if (moveX == 0 && rb2d.velocity.x < 0)
+            {
+                rb2d.velocity = new Vector2(0, rb2d.velocity.y);
+            }
+            if (moveX == 0 && rb2d.velocity.x > 0)
+            {
+                rb2d.velocity = new Vector2(0, rb2d.velocity.y);
+            }
+            if (rb2d.velocity.x > 20)
+            {
+                rb2d.velocity = new Vector2(20, rb2d.velocity.y);
+            }
+            if (rb2d.velocity.x < -20)
+            {
+                rb2d.velocity = new Vector2(-20, rb2d.velocity.y);
+            }
         }
         else
         {
-            Vector2 move = playerControls.Player.Move.ReadValue<Vector2>();
+            moveX = move.x;
             move.x *= speed * airSpeed;
             rb2d.AddForce(move * Vector2.right, ForceMode2D.Force);
+            if(rb2d.velocity.x > 20)
+            {
+                rb2d.velocity = new Vector2(20, rb2d.velocity.y);
+            }
+            if (rb2d.velocity.x < -20)
+            {
+                rb2d.velocity = new Vector2(-20, rb2d.velocity.y);
+            }
+            if (moveX == 1 && rb2d.velocity.x < 0)
+            {
+                rb2d.velocity = new Vector2(0, rb2d.velocity.y);
+            }
+            if (moveX == -1 && rb2d.velocity.x > 0)
+            {
+                rb2d.velocity = new Vector2(0, rb2d.velocity.y);
+            }
         }
     }
-    private void Jump(InputAction.CallbackContext cxt)
+    public void Move(float move)
+    {      
+        if (grounded)
+        {
+            moveX = move;
+            move *= speed;
+            rb2d.AddForce(move * Vector2.right, ForceMode2D.Force);
+            if (move == 0 && rb2d.velocity.x < 0)
+            {
+                rb2d.velocity = new Vector2(0, rb2d.velocity.y);
+            }
+            if (move == 0 && rb2d.velocity.x > 0)
+            {
+                rb2d.velocity = new Vector2(0, rb2d.velocity.y);
+            }
+            if (rb2d.velocity.x > 20)
+            {
+                rb2d.velocity = new Vector2(20, rb2d.velocity.y);
+            }
+            if (rb2d.velocity.x < -20)
+            {
+                rb2d.velocity = new Vector2(-20, rb2d.velocity.y);
+            }
+        }
+        else
+        {
+            moveX = move;
+            move *= speed * airSpeed;
+            rb2d.AddForce(move * Vector2.right, ForceMode2D.Force);
+            if (rb2d.velocity.x > 20)
+            {
+                rb2d.velocity = new Vector2(20, rb2d.velocity.y);
+            }
+            if (rb2d.velocity.x < -20)
+            {
+                rb2d.velocity = new Vector2(-20, rb2d.velocity.y);
+            }
+            if (moveX == 1 && rb2d.velocity.x < 0)
+            {
+                rb2d.velocity = new Vector2(0, rb2d.velocity.y);
+            }
+            if (moveX == -1 && rb2d.velocity.x > 0)
+            {
+                rb2d.velocity = new Vector2(0, rb2d.velocity.y);
+            }
+        }
+    }
+    public void Jump(InputAction.CallbackContext cxt)
     {
         if (grounded)
         {
@@ -93,7 +176,7 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            rb2d.drag = 5;
+            rb2d.drag = groundDrag;
         }
     }
 }  
